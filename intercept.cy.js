@@ -11,10 +11,52 @@ describe('Login Feature', () => {
         cy.get('h6').contains('Dashboard').should('have.text','Dashboard');    
     });
         
+    it('Intercept Display the dashboard after successful login', () => {
+        cy.visit('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login'),
+        cy.get('[name="username"]').type('Admin');
+        cy.get('[name="password"]').type('admin123');
+
+        // intercept request dashboard (atau data lain setelah login)
+        cy.intercept('GET','**/action-summary').as('actionsummury');
+        cy.intercept('GET','**/subunit').as('subunit');
+        cy.intercept('GET','**/dashboard/employees/locations').as('locations');
+        cy.get('[type="submit"]').click();
+
+        // Tunggu untuk request ke login endpoint
+        cy.wait('@actionsummury'); 
+        cy.wait('@subunit');
+        cy.wait('@locations');
+        cy.get('h6').contains('Dashboard').should('have.text','Dashboard');
+        cy.get('.oxd-chart-legend').should('be.visible'); // chart legend nampak
+    }); 
+
+    it('intercept login request dashboard', () => {
+                    
+        // Kunjungi halaman login
+        cy.visit('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+    
+        // Isi form login
+        cy.get('input[name="username"]').type('Admin');
+        cy.get('input[name="password"]').type('admin123');
+    
+        // intercept request dashboard (atau data lain setelah login)
+        cy.intercept('GET', '/web/index.php/dashboard/index').as('dashboardRequest');
+
+        // Kirim form login
+        cy.get('button[type="submit"]').click();
+    
+        // Tunggu untuk request dashboard dan pastikan data tersedia
+        cy.wait('@dashboardRequest').its('response.statusCode').should('eq', 200);
+    
+        // Memastikan elemen-elemen di dashboard muncul setelah login
+        cy.get('.oxd-topbar').should('exist'); // contoh elemen dashboard
+    });
+
      // Test untuk login dengan kredensial yang salah
     it('Test Login : User name Valid dan Passsword invalid', () => {
         // Mengisi form login dengan kredensial User benar dan Passwaord yang salah
         cy.visit('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login'),
+        cy.get('h5').contains('Login').should('have.text','Login');
         cy.get('[name="username"]').type('Admin');  // Input username Benar
         cy.get('[name="password"]').type('passwordsalah');  // Input password salah
         cy.get('[type="submit"]').click();  // Klik tombol login
@@ -84,16 +126,5 @@ describe('Login Feature', () => {
         cy.url().should('include', '/requestPasswordResetCode');
     });
 
-    it('Display the dashboard after successful login', () => {
-        cy.visit('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login'),
-        cy.get('[name="username"]').type('Admin');
-        cy.get('[name="password"]').type('admin123');
-        cy.intercept('GET','**/action-summary').as('actionsummury')
-        cy.get('[type="submit"]').click();
-        cy.wait('@actionsummury');
-        cy.get('h6').contains('Dashboard').should('have.text','Dashboard');
-        cy.get('.oxd-chart-legend').should('be.visible'); // chart legend nampak
-    });
-
-       
+    
 })
