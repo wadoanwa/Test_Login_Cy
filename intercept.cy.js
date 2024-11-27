@@ -36,8 +36,8 @@ describe('Login Feature', () => {
         cy.visit('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
     
         // Isi form login
-        cy.get('input[name="username"]').type('Admin');
-        cy.get('input[name="password"]').type('admin123');
+        cy.get('[name="username"]').type('Admin');
+        cy.get('[name="password"]').type('admin123');
     
         // intercept request dashboard (atau data lain setelah login)
         cy.intercept('GET', '/web/index.php/dashboard/index').as('dashboardRequest');
