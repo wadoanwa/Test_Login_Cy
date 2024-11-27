@@ -49,6 +49,7 @@ describe('Login Feature', () => {
         cy.wait('@dashboardRequest').its('response.statusCode').should('eq', 200);
     
         // Memastikan elemen-elemen di dashboard muncul setelah login
+        cy.get('h6').contains('Dashboard').should('have.text','Dashboard');
         cy.get('.oxd-topbar').should('exist'); // contoh elemen dashboard
     });
 
